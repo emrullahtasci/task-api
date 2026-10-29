@@ -1,17 +1,18 @@
 # Task API
 
-![CI](https://github.com/<your-username>/task-api/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/emrullahtasci/task-api/actions/workflows/ci.yml/badge.svg)
 
-A small REST API for managing tasks, built to practice containerization and CI/CD.
-It runs as two containers (Flask API + PostgreSQL) with Docker Compose, and every
-push is tested, smoke-tested in Docker and published to GitHub Container Registry
-by GitHub Actions.
+Görev (task) yönetimi için küçük bir REST API. Container'laştırma ve CI/CD
+pratiği yapmak için geliştirildi. Docker Compose ile iki container olarak
+(Flask API + PostgreSQL) çalışır. Her push'ta GitHub Actions testleri çalıştırır,
+Docker ortamını ayağa kaldırıp smoke test yapar ve image'ı GitHub Container
+Registry'ye gönderir.
 
-## Architecture
+## Mimari
 
 ```mermaid
 flowchart LR
-    Client -->|HTTP :8000| API[Flask API<br/>gunicorn]
+    Client[İstemci] -->|HTTP :8000| API[Flask API<br/>gunicorn]
     API -->|SQLAlchemy| DB[(PostgreSQL)]
     DB --- Vol[(db-data volume)]
 ```
@@ -20,43 +21,43 @@ flowchart LR
 flowchart LR
     Push[git push] --> Test[pytest]
     Test --> Smoke[docker compose up<br/>+ curl smoke test]
-    Smoke -->|main branch| GHCR[Push image to GHCR]
+    Smoke -->|main branch| GHCR[Image'ı GHCR'a gönder]
 ```
 
-## Tech stack
+## Kullanılan teknolojiler
 
-- **App:** Python 3.12, Flask, SQLAlchemy, gunicorn
-- **Database:** PostgreSQL 16 (SQLite in tests)
-- **Containers:** Docker, Docker Compose (healthchecks, named volume, non-root user)
+- **Uygulama:** Python 3.12, Flask, SQLAlchemy, gunicorn
+- **Veritabanı:** PostgreSQL 16 (testlerde SQLite)
+- **Container:** Docker, Docker Compose (healthcheck, named volume, root olmayan kullanıcı)
 - **CI/CD:** GitHub Actions, GitHub Container Registry
 
-## Run it
+## Çalıştırma
 
 ```bash
-cp .env.example .env        # optional: change the database password
+cp .env.example .env        # isteğe bağlı: veritabanı şifresini değiştir
 docker compose up -d --build
 curl http://localhost:8000/health
 ```
 
-Stop it with `docker compose down` (add `-v` to also delete the database volume).
+Durdurmak için `docker compose down` (veritabanını da silmek için `-v` ekle).
 
 ## API
 
-| Method | Path | Body | Description |
+| Metot | Yol | Body | Açıklama |
 | --- | --- | --- | --- |
-| GET | `/health` | | Checks the API and database are up |
-| GET | `/tasks` | | List all tasks |
-| POST | `/tasks` | `{"title": "..."}` | Create a task |
-| GET | `/tasks/<id>` | | Get one task |
-| PATCH | `/tasks/<id>` | `{"title": "...", "done": true}` | Update a task |
-| DELETE | `/tasks/<id>` | | Delete a task |
+| GET | `/health` | | API ve veritabanının çalıştığını kontrol eder |
+| GET | `/tasks` | | Tüm görevleri listeler |
+| POST | `/tasks` | `{"title": "..."}` | Yeni görev oluşturur |
+| GET | `/tasks/<id>` | | Tek bir görevi getirir |
+| PATCH | `/tasks/<id>` | `{"title": "...", "done": true}` | Görevi günceller |
+| DELETE | `/tasks/<id>` | | Görevi siler |
 
 ```bash
 curl -X POST -H "Content-Type: application/json" \
-  -d '{"title":"Learn Docker"}' http://localhost:8000/tasks
+  -d '{"title":"Docker öğren"}' http://localhost:8000/tasks
 ```
 
-## Run tests locally
+## Testleri lokalde çalıştırma
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
